@@ -1,0 +1,5 @@
+src/pages/calculators/*
+!src/pages/calculators/mortgage-calculator
+!src/pages/calculators/bmi-calculator
+!src/pages/calculators/calorie-calculator
+!src/pages/calculators/duct-calculator
