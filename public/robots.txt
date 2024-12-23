@@ -37,4 +37,4 @@ User-agent: DuckDuckBot
 Crawl-delay: 2
 
 # Sitemap
-Sitemap: https://calculator.info/sitemap.xml
+Sitemap: https://calculator.info/calculator-sitemap.xml
