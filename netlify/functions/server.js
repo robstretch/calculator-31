@@ -82,9 +82,10 @@ exports.handler = async (event, context) => {
         staticHandler(req, res, resolve);
       });
 
-      console.log("step 3 ----");
+      console.log("step 3 ---- responseBody", responseBody);
 
       if (responseBody) {
+        console.log("step 3.1 ------");
         return {
           statusCode: 200,
           headers: {
@@ -96,13 +97,15 @@ exports.handler = async (event, context) => {
       }
     }
 
+    console.log("step 4 ----");
+
     const { render } = await import("../../dist/server/entry-server.js");
     const rendered = await render(
       { path: event.rawUrl },
       JSON.parse(ssrManifest)
     );
 
-    console.log("step 4 ----");
+    console.log("step 4.1 ---- rendered");
 
     const helmet = rendered.head;
     const helmetString = `${helmet.title.toString()}
