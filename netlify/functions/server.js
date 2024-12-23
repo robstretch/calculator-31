@@ -52,7 +52,34 @@ exports.handler = async (event, context) => {
           ".jpg": "image/jpeg",
           ".svg": "image/svg+xml",
           ".json": "application/json",
+          ".txt": "text/plain",
+          ".xml": "application/xml",
+          ".ico": "image/x-icon",
+          ".webp": "image/webp",
+          ".woff": "font/woff",
+          ".woff2": "font/woff2",
+          ".ttf": "font/ttf",
+          ".eot": "application/vnd.ms-fontobject",
+          ".otf": "font/otf",
+          ".html": "text/html",
+          ".htm": "text/html",
         };
+
+        // Determine if the file should be base64 encoded
+        const binaryTypes = [
+          ".png",
+          ".jpg",
+          ".jpeg",
+          ".gif",
+          ".webp",
+          ".ico",
+          ".woff",
+          ".woff2",
+          ".ttf",
+          ".eot",
+          ".otf",
+        ];
+        const isBinary = binaryTypes.includes(ext);
 
         return {
           statusCode: 200,
@@ -60,8 +87,10 @@ exports.handler = async (event, context) => {
             "Content-Type": contentTypes[ext] || "application/octet-stream",
             "Cache-Control": "public, max-age=31536000",
           },
-          body: fileContent.toString("base64"),
-          isBase64Encoded: true,
+          body: isBinary
+            ? fileContent.toString("base64")
+            : fileContent.toString(),
+          isBase64Encoded: isBinary,
         };
       } catch (err) {
         console.error("Static file error:", err);
