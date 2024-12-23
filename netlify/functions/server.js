@@ -1,6 +1,7 @@
 const { createServer } = require("http");
 const { join } = require("path");
 const { readFileSync } = require("fs");
+const path = require("path");
 
 exports.handler = async (event, context) => {
   console.log("Request path:", event.path);
@@ -9,27 +10,32 @@ exports.handler = async (event, context) => {
 
   console.log("event.rawUrl", event.rawUrl);
 
-  const template = readFileSync(
-    join(__dirname, "../../dist/client/index.html"),
-    "utf-8"
-  );
-
-  console.log("template", template);
-
-  // Read the server entry point
-  const manifest = JSON.parse(
-    readFileSync(
-      join(__dirname, "../../dist/client/.vite/ssr-manifest.json"),
-      "utf-8"
-    )
-  );
-
-  console.log("manifest", manifest);
-
-  // Import your server entry point
-  const { render } = require("../../dist/server/entry-server.js");
-
   try {
+    const indexPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "dist",
+      "client",
+      "index.html"
+    );
+    const template = fs.readFileSync(indexPath, "utf8");
+
+    console.log("template", template);
+
+    // Read the server entry point
+    const manifest = JSON.parse(
+      readFileSync(
+        join(__dirname, "../../dist/client/.vite/ssr-manifest.json"),
+        "utf-8"
+      )
+    );
+
+    console.log("manifest", manifest);
+
+    // Import your server entry point
+    const { render } = require("../../dist/server/entry-server.js");
+
     const url = event.rawUrl || event.path;
     const rendered = await render({ path: url }, manifest);
 
