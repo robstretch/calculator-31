@@ -1,15 +1,8 @@
-const { createServer } = require("http");
 const { join } = require("path");
 const { readFileSync } = require("fs");
 const path = require("path");
 
 exports.handler = async (event, context) => {
-  console.log("Request path:", event.path);
-  console.log("Request headers:", event.headers);
-  console.log("Request method:", event.httpMethod);
-
-  console.log("event.rawUrl", event.rawUrl);
-
   try {
     const indexPath = path.join(
       __dirname,
@@ -21,9 +14,9 @@ exports.handler = async (event, context) => {
     );
     const template = readFileSync(indexPath, "utf8");
 
-    console.log("template", template);
+    // Import the server entry point using dynamic import
+    const { render } = await import("../../dist/server/entry-server.js");
 
-    // Read the server entry point
     const manifest = JSON.parse(
       readFileSync(
         join(__dirname, "../../dist/client/.vite/ssr-manifest.json"),
@@ -31,15 +24,8 @@ exports.handler = async (event, context) => {
       )
     );
 
-    console.log("manifest", manifest);
-
-    // Import your server entry point
-    const { render } = require("../../dist/server/entry-server.js");
-
     const url = event.rawUrl || event.path;
     const rendered = await render({ path: url }, manifest);
-
-    console.log("rendered", rendered);
 
     const helmet = rendered.head;
 

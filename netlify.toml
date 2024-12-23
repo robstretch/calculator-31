@@ -9,6 +9,10 @@
 [build.environment]
   NODE_VERSION = "18"
 
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["dist/**"]
+
 # First, handle static assets
 [[redirects]]
   from = "/assets/*"
@@ -21,6 +25,3 @@
   to = "/.netlify/functions/server"
   status = 200
   force = true
-
-[functions]
-  included_files = ["dist/**"]
