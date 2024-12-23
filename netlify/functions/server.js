@@ -19,7 +19,7 @@ exports.handler = async (event, context) => {
       "client",
       "index.html"
     );
-    const template = fs.readFileSync(indexPath, "utf8");
+    const template = readFileSync(indexPath, "utf8");
 
     console.log("template", template);
 
