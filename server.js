@@ -11,6 +11,10 @@ const templateHtml = isProduction
   ? await fs.readFile("./dist/client/index.html", "utf-8")
   : "";
 
+const ssrManifest = isProduction
+  ? await fs.readFile("./dist/client/.vite/ssr-manifest.json", "utf-8")
+  : undefined;
+
 // Create http server
 const app = express();
 
@@ -34,6 +38,11 @@ if (!isProduction) {
 
 // Serve HTML
 app.use("*", async (req, res) => {
+  // Favicon Fix
+  if (req.originalUrl === "/favicon.svg") {
+    return res.sendFile(path.resolve("./public/favicon.svg"));
+  }
+
   try {
     const url = req.originalUrl.replace(base, "");
 
@@ -51,7 +60,7 @@ app.use("*", async (req, res) => {
       render = (await import("./dist/server/entry-server.js")).render;
     }
 
-    const rendered = await render(url);
+    const rendered = await render({ path: req.originalUrl }, ssrManifest);
 
     const helmet = rendered.head;
 

@@ -3,12 +3,12 @@ import { StaticRouter } from "react-router-dom/server";
 import { HelmetProvider } from "react-helmet-async";
 import { App } from "./App";
 
-export function render(url: string) {
+export function render({ path }: { path: string }) {
   const helmetContext = {} as any;
 
   const html = renderToString(
     <HelmetProvider context={helmetContext}>
-      <StaticRouter location={url}>
+      <StaticRouter location={path}>
         <App />
       </StaticRouter>
     </HelmetProvider>
