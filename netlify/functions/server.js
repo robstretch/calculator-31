@@ -46,7 +46,7 @@ exports.handler = async (event, context) => {
         const ext = path.extname(event.path);
 
         const contentType = getContentType(ext);
-        const isBinary = isBinary(ext);
+        const isBinary = isBinaryFile(ext);
 
         return {
           statusCode: 200,
@@ -139,6 +139,6 @@ function getContentType(ext) {
   return contentTypes[ext] || "application/octet-stream";
 }
 
-function isBinary(ext) {
-  return binaryTypes.includes(ext);
+function isBinaryFile(fileExt) {
+  return binaryTypes.includes(fileExt);
 }
