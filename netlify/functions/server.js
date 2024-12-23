@@ -35,7 +35,8 @@ exports.handler = async (event, context) => {
     // Handle static assets from dist/client or public folder
     if (
       event.path.startsWith("/assets/") ||
-      event.path.startsWith("/public/")
+      event.path === "/robots.txt" ||
+      event.path === "/calculator-sitemap.xml"
     ) {
       // Get the file path relative to the dist/client directory
       const filePath = join(__dirname, "../../dist/client", event.path);
@@ -44,47 +45,13 @@ exports.handler = async (event, context) => {
         const fileContent = readFileSync(filePath);
         const ext = path.extname(event.path);
 
-        // Basic content type mapping
-        const contentTypes = {
-          ".css": "text/css",
-          ".js": "application/javascript",
-          ".png": "image/png",
-          ".jpg": "image/jpeg",
-          ".svg": "image/svg+xml",
-          ".json": "application/json",
-          ".txt": "text/plain",
-          ".xml": "application/xml",
-          ".ico": "image/x-icon",
-          ".webp": "image/webp",
-          ".woff": "font/woff",
-          ".woff2": "font/woff2",
-          ".ttf": "font/ttf",
-          ".eot": "application/vnd.ms-fontobject",
-          ".otf": "font/otf",
-          ".html": "text/html",
-          ".htm": "text/html",
-        };
-
-        // Determine if the file should be base64 encoded
-        const binaryTypes = [
-          ".png",
-          ".jpg",
-          ".jpeg",
-          ".gif",
-          ".webp",
-          ".ico",
-          ".woff",
-          ".woff2",
-          ".ttf",
-          ".eot",
-          ".otf",
-        ];
-        const isBinary = binaryTypes.includes(ext);
+        const contentType = getContentType(ext);
+        const isBinary = isBinary(ext);
 
         return {
           statusCode: 200,
           headers: {
-            "Content-Type": contentTypes[ext] || "application/octet-stream",
+            "Content-Type": contentType,
             "Cache-Control": "public, max-age=31536000",
           },
           body: isBinary
@@ -131,3 +98,47 @@ ${helmet.link.toString()}`;
     };
   }
 };
+
+// Basic content type mapping
+const contentTypes = {
+  ".css": "text/css",
+  ".js": "application/javascript",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".json": "application/json",
+  ".txt": "text/plain",
+  ".xml": "application/xml",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".eot": "application/vnd.ms-fontobject",
+  ".otf": "font/otf",
+  ".html": "text/html",
+  ".htm": "text/html",
+};
+
+// Determine if the file should be base64 encoded
+const binaryTypes = [
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".ico",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".eot",
+  ".otf",
+];
+
+function getContentType(ext) {
+  return contentTypes[ext] || "application/octet-stream";
+}
+
+function isBinary(ext) {
+  return binaryTypes.includes(ext);
+}
