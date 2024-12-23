@@ -1,5 +1,5 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import React from "react";
+import { Helmet } from "react-helmet-async";
 
 interface SEOProps {
   title: string;
@@ -9,14 +9,14 @@ interface SEOProps {
   imageUrl?: string;
 }
 
-export function SEO({ 
-  title, 
-  description, 
-  keywords = [], 
+export function SEO({
+  title,
+  description,
+  keywords = [],
   canonicalUrl,
-  imageUrl
+  imageUrl,
 }: SEOProps) {
-  const domain = 'https://calculator.info';
+  const domain = "https://calculator.info";
   const fullUrl = canonicalUrl ? `${domain}${canonicalUrl}` : domain;
   const defaultImage = `${domain}/social-share.jpg`;
 
@@ -26,9 +26,9 @@ export function SEO({
       <title>{title}</title>
       <meta name="description" content={description} />
       {keywords.length > 0 && (
-        <meta name="keywords" content={keywords.join(', ')} />
+        <meta name="keywords" content={keywords.join(", ")} />
       )}
-      
+
       {/* Open Graph tags */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
@@ -36,16 +36,16 @@ export function SEO({
       <meta property="og:url" content={fullUrl} />
       <meta property="og:image" content={imageUrl || defaultImage} />
       <meta property="og:site_name" content="Calculator.info" />
-      
+
       {/* Twitter Card tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={imageUrl || defaultImage} />
-      
+
       {/* Canonical URL */}
       {canonicalUrl && <link rel="canonical" href={fullUrl} />}
-      
+
       {/* Additional meta tags */}
       <meta name="robots" content="index, follow" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
