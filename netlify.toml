@@ -18,6 +18,6 @@
 # Then, handle all other routes through the SSR function
 [[redirects]]
   from = "/*"
-  to = "/netlify/functions/server"
+  to = "/.netlify/functions/server"
   status = 200
   force = true
