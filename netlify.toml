@@ -15,14 +15,6 @@
   node_bundler = "esbuild"
   included_files = ["dist/**"]
 
-# First, handle static assets
-[[redirects]]
-  from = "/assets/*"
-  to = "/dist/client/assets/:splat"
-  status = 200
-  force = true
-
-
 # Then, handle all other routes through the SSR function
 [[redirects]]
   from = "/*"
