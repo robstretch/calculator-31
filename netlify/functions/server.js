@@ -3,10 +3,14 @@ const { join } = require("path");
 const { readFileSync } = require("fs");
 
 exports.handler = async (event, context) => {
+  console.log("event.rawUrl", event.rawUrl);
+
   const template = readFileSync(
     join(__dirname, "../../dist/client/index.html"),
     "utf-8"
   );
+
+  console.log("template", template);
 
   // Read the server entry point
   const manifest = JSON.parse(
@@ -16,12 +20,16 @@ exports.handler = async (event, context) => {
     )
   );
 
+  console.log("manifest", manifest);
+
   // Import your server entry point
   const { render } = require("../../dist/server/entry-server.js");
 
   try {
     const url = event.rawUrl || event.path;
     const rendered = await render({ path: url }, manifest);
+
+    console.log("rendered", rendered);
 
     const helmet = rendered.head;
 
