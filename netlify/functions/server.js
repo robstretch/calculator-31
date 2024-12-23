@@ -34,10 +34,9 @@ ${helmet.link.toString()}`;
       .replace(`<!--app-html-->`, rendered.html ?? "");
 
     return {
-      statusCode: status || 200,
+      statusCode: 200,
       headers: {
         "Content-Type": "text/html",
-        ...headers,
       },
       body: html,
     };
