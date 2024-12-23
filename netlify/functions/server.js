@@ -12,9 +12,7 @@ const staticHandler = sirv(join(__dirname, "../../dist/client"), {
   extensions: [],
   immutable: true,
 });
-const publicHandler = sirv(join(__dirname, "../../public"), {
-  extensions: [],
-});
+
 const compressHandler = compression();
 
 // Cache production assets
@@ -77,12 +75,14 @@ exports.handler = async (event, context) => {
         compressHandler(req, res, resolve);
       });
 
-      // Try serving from dist/client first, then public
+      console.log("step 2 ----");
+
+      // Try serving from dist/client
       await new Promise((resolve) => {
-        staticHandler(req, res, () => {
-          publicHandler(req, res, resolve);
-        });
+        staticHandler(req, res, resolve);
       });
+
+      console.log("step 3 ----");
 
       if (responseBody) {
         return {
@@ -96,13 +96,13 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Handle HTML requests
-    const url = event.rawUrl.replace(base, "");
     const { render } = await import("../../dist/server/entry-server.js");
     const rendered = await render(
       { path: event.rawUrl },
       JSON.parse(ssrManifest)
     );
+
+    console.log("step 4 ----");
 
     const helmet = rendered.head;
     const helmetString = `${helmet.title.toString()}
@@ -112,6 +112,8 @@ ${helmet.link.toString()}`;
     const html = templateHtml
       .replace(`<!--app-head-->`, helmetString)
       .replace(`<!--app-html-->`, rendered.html ?? "");
+
+    console.log("step 5 ----");
 
     return {
       statusCode: 200,
