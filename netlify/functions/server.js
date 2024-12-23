@@ -7,14 +7,6 @@ const compression = require("compression");
 // Constants
 const base = process.env.BASE || "/";
 
-// Create static file handlers
-const staticHandler = sirv(join(__dirname, "../../dist/client"), {
-  extensions: [],
-  immutable: true,
-});
-
-const compressHandler = compression();
-
 // Cache production assets
 const templateHtml = readFileSync(
   join(__dirname, "../../dist/client/index.html"),
@@ -51,48 +43,39 @@ exports.handler = async (event, context) => {
     ) {
       console.log("STATIC!! event.rawUrl", event.rawUrl);
 
-      const req = {
-        url: event.rawUrl,
-        headers: event.headers,
-      };
+      // Get the file path relative to the dist/client directory
+      const filePath = join(__dirname, "../../dist/client", event.path);
 
-      let responseBody;
-      let contentType;
+      try {
+        const fileContent = readFileSync(filePath);
+        const ext = path.extname(event.path);
 
-      const res = {
-        setHeader: (key, value) => {
-          if (key.toLowerCase() === "content-type") {
-            contentType = value;
-          }
-        },
-        end: (body) => {
-          responseBody = body;
-        },
-      };
+        // Basic content type mapping
+        const contentTypes = {
+          ".css": "text/css",
+          ".js": "application/javascript",
+          ".png": "image/png",
+          ".jpg": "image/jpeg",
+          ".svg": "image/svg+xml",
+          ".json": "application/json",
+        };
 
-      // Apply compression
-      await new Promise((resolve) => {
-        compressHandler(req, res, resolve);
-      });
-
-      console.log("step 2 ----");
-
-      // Try serving from dist/client
-      await new Promise((resolve) => {
-        staticHandler(req, res, resolve);
-      });
-
-      console.log("step 3 ---- responseBody", responseBody);
-
-      if (responseBody) {
         console.log("step 3.1 ------");
+
         return {
           statusCode: 200,
           headers: {
-            "Content-Type": contentType,
+            "Content-Type": contentTypes[ext] || "application/octet-stream",
+            "Cache-Control": "public, max-age=31536000",
           },
-          body: responseBody.toString("base64"),
+          body: fileContent.toString("base64"),
           isBase64Encoded: true,
+        };
+      } catch (err) {
+        console.error("Static file error:", err);
+        return {
+          statusCode: 404,
+          body: "File not found",
         };
       }
     }
