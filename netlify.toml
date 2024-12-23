@@ -18,7 +18,7 @@
 # First, handle static assets
 [[redirects]]
   from = "/assets/*"
-  to = "/assets/:splat"
+  to = "/dist/client/assets/:splat"
   status = 200
   force = true
 
