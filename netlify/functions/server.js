@@ -3,6 +3,8 @@ const { readFileSync } = require("fs");
 const path = require("path");
 
 exports.handler = async (event, context) => {
+  console.log("event.rawUrl", event.rawUrl);
+
   try {
     const indexPath = path.join(
       __dirname,
