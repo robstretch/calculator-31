@@ -18,13 +18,9 @@ const ssrManifest = readFileSync(
 );
 
 exports.handler = async (event, context) => {
-  console.log("event.rawUrl", event.rawUrl);
-  console.log("event.path", event.path);
-
   try {
     // Handle favicon
     if (event.path === "/favicon.svg") {
-      console.log("FAVICON!! event.rawUrl", event.rawUrl);
       const favicon = readFileSync(join(__dirname, "../../public/favicon.svg"));
       return {
         statusCode: 200,
@@ -41,8 +37,6 @@ exports.handler = async (event, context) => {
       event.path.startsWith("/assets/") ||
       event.path.startsWith("/public/")
     ) {
-      console.log("STATIC!! event.rawUrl", event.rawUrl);
-
       // Get the file path relative to the dist/client directory
       const filePath = join(__dirname, "../../dist/client", event.path);
 
@@ -59,8 +53,6 @@ exports.handler = async (event, context) => {
           ".svg": "image/svg+xml",
           ".json": "application/json",
         };
-
-        console.log("step 3.1 ------");
 
         return {
           statusCode: 200,
@@ -80,15 +72,11 @@ exports.handler = async (event, context) => {
       }
     }
 
-    console.log("step 4 ----");
-
     const { render } = await import("../../dist/server/entry-server.js");
     const rendered = await render(
-      { path: event.rawUrl },
+      { path: event.path },
       JSON.parse(ssrManifest)
     );
-
-    console.log("step 4.1 ---- rendered");
 
     const helmet = rendered.head;
     const helmetString = `${helmet.title.toString()}
@@ -98,8 +86,6 @@ ${helmet.link.toString()}`;
     const html = templateHtml
       .replace(`<!--app-head-->`, helmetString)
       .replace(`<!--app-html-->`, rendered.html ?? "");
-
-    console.log("step 5 ----");
 
     return {
       statusCode: 200,
