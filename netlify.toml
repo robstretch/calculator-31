@@ -4,7 +4,6 @@
   functions = "netlify/functions"
   include = ["dist/**", "assets/**"]
   exclude = ["node_modules/**"]
-  base = "dist"
 
 [build.processing]
   skip_processing = true
