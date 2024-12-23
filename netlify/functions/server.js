@@ -3,6 +3,10 @@ const { join } = require("path");
 const { readFileSync } = require("fs");
 
 exports.handler = async (event, context) => {
+  console.log("Request path:", event.path);
+  console.log("Request headers:", event.headers);
+  console.log("Request method:", event.httpMethod);
+
   console.log("event.rawUrl", event.rawUrl);
 
   const template = readFileSync(
