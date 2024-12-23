@@ -2,7 +2,7 @@
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
-  include = ["dist/**", "assets/**"]
+  include = ["dist/**"]
   exclude = ["node_modules/**"]
 
 [build.processing]
@@ -13,7 +13,7 @@
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["dist/**", "assets/**"]
+  included_files = ["dist/**"]
 
 # First, handle static assets
 [[redirects]]
