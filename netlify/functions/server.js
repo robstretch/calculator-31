@@ -2,30 +2,49 @@ const { join } = require("path");
 const { readFileSync } = require("fs");
 const path = require("path");
 const sirv = require("sirv");
+const compression = require("compression");
 
-// Create static file handler
+// Constants
+const base = process.env.BASE || "/";
+
+// Create static file handlers
 const staticHandler = sirv(join(__dirname, "../../dist/client"), {
   extensions: [],
+  immutable: true,
 });
+const compressHandler = compression();
+
+// Cache production assets
+const templateHtml = readFileSync(
+  join(__dirname, "../../dist/client/index.html"),
+  "utf-8"
+);
+const ssrManifest = readFileSync(
+  join(__dirname, "../../dist/client/.vite/ssr-manifest.json"),
+  "utf-8"
+);
 
 exports.handler = async (event, context) => {
   console.log("event.rawUrl", event.rawUrl);
 
-  // Favicon Fix
-  if (event.rawUrl === "/favicon.svg") {
-    return {
-      statusCode: 200,
-      body: readFileSync(join(__dirname, "../../public/favicon.svg")),
-      headers: {
-        "Content-Type": "image/svg+xml",
-      },
-    };
-  }
-
   try {
+    // Handle favicon
+    if (event.rawUrl === "/favicon.svg") {
+      const favicon = readFileSync(join(__dirname, "../../public/favicon.svg"));
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "image/svg+xml",
+        },
+        body: favicon.toString("base64"),
+        isBase64Encoded: true,
+      };
+    }
+
     // Handle static assets
     if (event.rawUrl.startsWith("/assets/")) {
-      // Convert Netlify event into mock req/res objects for sirv
+      console.log("ASSETS!! event.rawUrl", event.rawUrl);
+
       const req = {
         url: event.rawUrl,
         headers: event.headers,
@@ -45,7 +64,12 @@ exports.handler = async (event, context) => {
         },
       };
 
-      // Use sirv to handle the static file
+      // Apply compression
+      await new Promise((resolve) => {
+        compressHandler(req, res, resolve);
+      });
+
+      // Serve static file
       await new Promise((resolve) => {
         staticHandler(req, res, resolve);
       });
@@ -63,35 +87,19 @@ exports.handler = async (event, context) => {
     }
 
     // Handle HTML requests
-    const indexPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "dist",
-      "client",
-      "index.html"
-    );
-    const template = readFileSync(indexPath, "utf8");
-
+    const url = event.rawUrl.replace(base, "");
     const { render } = await import("../../dist/server/entry-server.js");
-
-    const manifest = JSON.parse(
-      readFileSync(
-        join(__dirname, "../../dist/client/.vite/ssr-manifest.json"),
-        "utf-8"
-      )
+    const rendered = await render(
+      { path: event.rawUrl },
+      JSON.parse(ssrManifest)
     );
-
-    const url = event.rawUrl || event.path;
-    const rendered = await render({ path: url }, manifest);
 
     const helmet = rendered.head;
-
     const helmetString = `${helmet.title.toString()}
 ${helmet.meta.toString()}
 ${helmet.link.toString()}`;
 
-    const html = template
+    const html = templateHtml
       .replace(`<!--app-head-->`, helmetString)
       .replace(`<!--app-html-->`, rendered.html ?? "");
 
@@ -106,7 +114,7 @@ ${helmet.link.toString()}`;
     console.error("SSR Error:", error);
     return {
       statusCode: 500,
-      body: "Internal Server Error",
+      body: error.stack,
     };
   }
 };
