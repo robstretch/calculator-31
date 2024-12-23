@@ -26,10 +26,12 @@ const ssrManifest = readFileSync(
 
 exports.handler = async (event, context) => {
   console.log("event.rawUrl", event.rawUrl);
+  console.log("event.path", event.path);
 
   try {
     // Handle favicon
-    if (event.rawUrl === "/favicon.svg") {
+    if (event.path === "/favicon.svg") {
+      console.log("FAVICON!! event.rawUrl", event.rawUrl);
       const favicon = readFileSync(join(__dirname, "../../public/favicon.svg"));
       return {
         statusCode: 200,
@@ -42,7 +44,7 @@ exports.handler = async (event, context) => {
     }
 
     // Handle static assets
-    if (event.rawUrl.startsWith("/assets/")) {
+    if (event.path.startsWith("/assets/")) {
       console.log("ASSETS!! event.rawUrl", event.rawUrl);
 
       const req = {
