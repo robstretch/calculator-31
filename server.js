@@ -29,20 +29,19 @@ if (!isProduction) {
     base,
   });
   app.use(vite.middlewares);
+  // Add static middleware for public folder in development
+  app.use(express.static("public"));
 } else {
   const compression = (await import("compression")).default;
   const sirv = (await import("sirv")).default;
   app.use(compression());
   app.use(base, sirv("./dist/client", { extensions: [] }));
+  // Add static middleware for public folder in production
+  app.use(base, sirv("./public"));
 }
 
 // Serve HTML
 app.use("*", async (req, res) => {
-  // Favicon Fix
-  if (req.originalUrl === "/favicon.svg") {
-    return res.sendFile(path.resolve("./public/favicon.svg"));
-  }
-
   try {
     const url = req.originalUrl.replace(base, "");
 

@@ -12,6 +12,9 @@ const staticHandler = sirv(join(__dirname, "../../dist/client"), {
   extensions: [],
   immutable: true,
 });
+const publicHandler = sirv(join(__dirname, "../../public"), {
+  extensions: [],
+});
 const compressHandler = compression();
 
 // Cache production assets
@@ -43,9 +46,12 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Handle static assets
-    if (event.path.startsWith("/assets/")) {
-      console.log("ASSETS!! event.rawUrl", event.rawUrl);
+    // Handle static assets from dist/client or public folder
+    if (
+      event.path.startsWith("/assets/") ||
+      event.path.startsWith("/public/")
+    ) {
+      console.log("STATIC!! event.rawUrl", event.rawUrl);
 
       const req = {
         url: event.rawUrl,
@@ -71,9 +77,11 @@ exports.handler = async (event, context) => {
         compressHandler(req, res, resolve);
       });
 
-      // Serve static file
+      // Try serving from dist/client first, then public
       await new Promise((resolve) => {
-        staticHandler(req, res, resolve);
+        staticHandler(req, res, () => {
+          publicHandler(req, res, resolve);
+        });
       });
 
       if (responseBody) {
